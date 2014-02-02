@@ -5,3 +5,4 @@ class Vertex:
         self.SUMO_id = id
         self.edges = []
         pass
+

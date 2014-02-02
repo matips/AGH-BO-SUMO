@@ -3,7 +3,8 @@ from Vertex import Vertex
 
 
 class Edge:
-    def __init__(self, vertex1: Vertex, vertex2: Vertex, medium_cost, maximu_cost, minimum_cost):
+    def __init__(self, vertex1: Vertex, vertex2: Vertex, medium_cost, maximu_cost, minimum_cost, sumo_id):
+        self.sumo_id = sumo_id
         self.vertex1 = vertex1
         self.vertex2 = vertex2
         self.medium_cost = medium_cost
