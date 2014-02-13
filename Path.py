@@ -1,9 +1,5 @@
-import Edge
-import Vertex
-
-
 class Path:
-    def __init__(self, vertexes:[Vertex]):
+    def __init__(self, vertexes):
         self.vertexes = vertexes
         self.cost = None #if cost was estimated
 
@@ -32,7 +28,7 @@ class Path:
             zip(self.vertexes, self.vertexes[1:])
         ))
 
-    def estimate_edge(self, edge:Edge):
+    def estimate_edge(self, edge):
         return edge.maximu_cost
 
 
