@@ -2,16 +2,17 @@ __author__ = 'Piotrek'
 
 from vertex import Vertex
 from edge import Edge
+from cityMap import CityMap
 import xml.etree.ElementTree as ET
 
-class NetworkLoader:
+class CityMapLoader:
 
     def load(self, networkFileName):
         net = ET.parse(networkFileName).getroot()
         vertices = self.__getVertices(net)
         edges = self.__getEdges(net, vertices)
         self.__addEdgesToVertices(vertices, edges)
-        return vertices
+        return CityMap(vertices)
 
     def __getVertices(self, net):
         plainJunctions = filter(lambda junction: junction.get('type') != 'internal', net.findall('junction'))
