@@ -1,0 +1,8 @@
+<configuration>
+    <input>
+        <net-file value="eichstaett.net.xml"/>
+        <route-files value="eichstaett.rou.xml"/>
+		<device.rerouting.probability value="1.0"/>
+		<device.rerouting.adaptation-weight value="0.0"/>
+    </input>
+</configuration>
