@@ -1,5 +1,6 @@
 import random
-from path import Path
+from SumoPathFinding.sumoPathFinding.path import Path
+
 
 class Population:
     def __init__(self, elements, path_finder, max_child):
@@ -14,9 +15,9 @@ class Population:
         child_path.remove_cycles()
         self.add_element(child_path)
 
-    def divide_point(self, max):
+    def divide_point(self, right):
         "determine divide point of mutate routes"
-        r = random.uniform(1 / (max + 1), 1)
+        r = random.uniform(1 / (right + 1), 1)
         return int(1 / r - 1)
 
     def add_element(self, new_element):

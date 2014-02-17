@@ -1,7 +1,13 @@
+from SumoPathFinding.sumoPathFinding.cityMap import Vertex
+
+
 class Path:
-    def __init__(self, vertexes):
+    def __init__(self, vertexes:[Vertex], cost = None):
         self.vertexes = vertexes
-        self.cost = None #if cost was estimated
+        self.cost = cost #if cost was estimated
+
+    def __repr__(self):
+        return "<{0}> -> {1}".format(self.vertexes, self.cost)
 
     def length(self):
         return len(self.vertexes)
