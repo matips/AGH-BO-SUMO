@@ -1,4 +1,4 @@
-from SumoPathFinding.sumoPathFinding.cityMap import Vertex
+from SumoPathFinding.sumoPathFinding.cityMap import Vertex, Edge
 
 
 class Path:
@@ -7,7 +7,7 @@ class Path:
         self.cost = cost #if cost was estimated
 
     def __repr__(self):
-        return "<{0}> -> {1}".format(self.vertexes, self.cost)
+        return "<{0}> -> {1}".format(self.vertexes, self.cost or self.estimate_cost(basic_metric))
 
     def length(self):
         return len(self.vertexes)
@@ -27,14 +27,17 @@ class Path:
             other.estimate_cost()
         return self.cost - other.cost
 
-    def estimate_cost(self):
-        self.cost = sum(map(
-            lambda xy: min(map(self.estimate_edge,
-                               filter(lambda edge: edge.vertex1 == xy[0] and edge.vertex2 == xy[1], xy[0].edges))),
+    def estimate_cost(self, metric):
+        return sum(map(
+            lambda xy: min(map(metric,
+                               list(filter(lambda edge: edge.vertex2 is xy[1], xy[0].edges)))),
             zip(self.vertexes, self.vertexes[1:])
         ))
 
+
     def estimate_edge(self, edge):
-        return edge.maximu_cost
+        return edge.medium_cost
 
 
+def basic_metric(edge: Edge):
+    return edge.medium_cost

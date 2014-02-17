@@ -6,7 +6,7 @@ class Vertex:
         self.sumo_id = sumo_id
 
     def neighbours(self):
-        return map(lambda e: e.vertex2, self.edges)
+        return list( map(lambda e: e.vertex2, self.edges))
 
     def add_edge(self, vertex2, medium_cost=None, maximum_cost = None, minimum_cost = None, sumo_id = None):
         """
@@ -31,8 +31,8 @@ class Edge:
         self.minimum_cost = minimum_cost
 
 class CityMap:
-    def __init__(self, vertices = None):
-        self.vertices = vertices or []
+    def __init__(self, vertexes = None):
+        self.vertexes = vertexes or []
         
     def __iter__(self):
-        return self.vertices.itervalues()
+        return self.vertexes.__iter__()

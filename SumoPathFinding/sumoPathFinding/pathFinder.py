@@ -3,7 +3,7 @@ from SumoPathFinding.sumoPathFinding.cityMap import CityMap, Vertex
 from SumoPathFinding.sumoPathFinding.path import Path
 
 
-def find_path(city_map:CityMap, start:Vertex, end:Vertex):
+def dijkstra_find_path(city_map:CityMap, start:Vertex, end:Vertex):
     "Dicstra alghorith here"
     costs, prevs = shortest_path(city_map, start)
     vertexes = [end, ]
@@ -36,7 +36,7 @@ def shortest_path(graph:CityMap, sourceNode:Vertex):
     # Initialization
     dist     = { sourceNode: 0 }
     previous = {}
-    q = graph.vertices
+    q = graph.vertexes.copy()
 
     # Algorithm loop
     while q:
