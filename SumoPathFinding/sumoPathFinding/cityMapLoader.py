@@ -1,7 +1,8 @@
+from SumoPathFinding.sumoPathFinding.cityMap import CityMap, Vertex, Edge
+
 __author__ = 'Piotrek'
 
 import xml.etree.ElementTree as ET
-from cityMap import Vertex, Edge, CityMap
 
 def loadNetwork(xmlFileName):
     net = ET.parse(xmlFileName).getroot()
