@@ -1,5 +1,4 @@
 import random
-from pip._vendor.requests.packages.urllib3.connectionpool import xrange
 from SumoPathFinding.sumoPathFinding.cityMap import CityMap, Vertex
 from SumoPathFinding.sumoPathFinding.path import Path, basic_metric
 
@@ -20,7 +19,7 @@ class Population:
         self.metric = comparator
 
     def run_algorithm(self, steps):
-        for _ in xrange(steps):
+        for _ in range(steps):
             self.add_paths([self.mutate(),] if random.random() < self.mutation_probability else list(self.crossing()))
 
         return self.population[0]

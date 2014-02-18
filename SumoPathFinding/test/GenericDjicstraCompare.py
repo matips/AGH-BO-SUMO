@@ -1,4 +1,3 @@
-from pip._vendor.requests.packages.urllib3.connectionpool import xrange
 from SumoPathFinding.sumoPathFinding.pathFinder import dijkstra_find_path
 from SumoPathFinding.sumoPathFinding.population import Population
 from time import time
@@ -33,12 +32,12 @@ class Timer:
 
 city_map = init_city_map()
 
-for _ in xrange(1000):
+for _ in range(1000):
     timer = Timer()
     dijkstra_find_path(city_map, city_map.vertexes[0], city_map.vertexes[10])
     timer.stop("Dijkstra")
 
-for _ in xrange(1000):
+for _ in range(1000):
     timer.reset()
     population = Population(city_map = city_map, start = city_map.vertexes[0], end = city_map.vertexes[10], population_size=4)
     population.run_algorithm(3)
