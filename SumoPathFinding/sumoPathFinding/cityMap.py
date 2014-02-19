@@ -36,3 +36,8 @@ class CityMap:
         
     def __iter__(self):
         return self.vertexes.__iter__()
+
+    def edgeIter(self):
+        for vertex in self.vertexes:
+            for edge in vertex.edges:
+                yield edge
