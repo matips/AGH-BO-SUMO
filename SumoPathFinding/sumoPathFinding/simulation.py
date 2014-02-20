@@ -3,6 +3,7 @@ __author__ = 'Piotrek'
 import os
 import sys
 import subprocess
+import pickle
 from SumoPathFinding.sumoPathFinding.inputLoader import loadInput
 from SumoPathFinding.sumoPathFinding.edgeTimeStats import EdgeTimeStats
 from collections import namedtuple
@@ -36,8 +37,8 @@ def updateVehiclePositions(vehicles, edgeTimes, vehicleEdges, step):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        sys.exit("Too few arguments.\nUsage: " + sys.argv[0] + " SUMO_NETWORK_FILE [STEP_LENGTH]")
+    if len(sys.argv) < 3:
+        sys.exit("Too few arguments.\nUsage: " + sys.argv[0] + " SUMOCFG_FILE OUTPUT_CITY_MAP_FILE [STEP_LENGTH]")
 
     # load city map and vehicle IDs
     cityMap, vehicles = loadInput(sys.argv[1])
@@ -51,8 +52,8 @@ if __name__ == "__main__":
 
     # start SUMO server
     sumoServer = subprocess.Popen(
-        [os.path.join(os.environ['SUMO_HOME'], 'bin', 'sumo'), '--remote-port', PORT.__str__(), '--step-length',
-         sys.argv[2] if len(sys.argv) > 2 else DEFAULT_STEP_LENGTH, '--seed', SEED.__str__(), '-c', sys.argv[1]],
+        [os.path.join(os.environ['SUMO_HOME'], 'bin', 'sumo'), '--remote-port', str(PORT), '--step-length',
+         sys.argv[3] if len(sys.argv) > 3 else str(DEFAULT_STEP_LENGTH), '--seed', str(SEED), '-c', sys.argv[1]],
         cwd=os.getcwd(), stdout=STDOUT_FILE, stderr=STDERR_FILE)
 
     # connect to server
@@ -71,7 +72,7 @@ if __name__ == "__main__":
         vehicleEdges[vehicle] = VehicleEdgeInfo(None, None)
 
     step = 0
-    stepLength = float(sys.argv[2])
+    stepLength = float(sys.argv[3]) if len(sys.argv) > 3 else DEFAULT_STEP_LENGTH
     while traci.simulation.getMinExpectedNumber() > 0:  # while there are vehicles in the simulation
         traci.simulationStep()
         updateVehiclePositions(vehicles, edgeTimes, vehicleEdges, step)
@@ -80,7 +81,14 @@ if __name__ == "__main__":
     traci.close()
     sumoServer.wait()
 
-    # output - temporary; for test purposes
+    for edge in cityMap.edgeIter():
+        edge.minimum_cost = edgeTimes[edge.sumo_id].getMinTime()
+        edge.maximum_cost = edgeTimes[edge.sumo_id].getMaxTime()
+        edge.medium_cost = edgeTimes[edge.sumo_id].getMeanTime()
+
+    # output - for test purposes
     print "edge ID, min time, max time, mean time:"
     for edge in cityMap.edgeIter():
         print(edge.sumo_id + ", " + str(edgeTimes[edge.sumo_id]))
+
+    pickle.dump(cityMap, open(sys.argv[2], 'w'))
