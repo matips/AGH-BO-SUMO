@@ -1,3 +1,4 @@
+import random
 from SumoPathFinding.sumoPathFinding.cityMap import Vertex, Edge
 
 
@@ -22,7 +23,7 @@ class Path:
         return self.vertexes[item]
 
     def __repr__(self):
-        return "<{0}> -> {1}".format(self.vertexes, self.cost or self.estimate_cost(basic_metric))
+        return "<{0}> -> {1}".format(self.vertexes, self.estimate_cost(basic_metric))
 
     def length(self):
         return len(self.vertexes)
@@ -37,11 +38,10 @@ class Path:
             prev[vertex] = i
 
     def estimate_cost(self, metric):
-        self.cost = sum(map(
+        return sum(map(
             lambda xy: min(map(metric, list(filter(lambda edge: edge.vertex2 is xy[1], xy[0].edges)))),
             zip(self.vertexes, self.vertexes[1:])
         ))
-        return self.cost
 
     # WARNING: Not tested
     # "convert" vertex path to edge path (a list of edge IDs)
@@ -51,3 +51,10 @@ class Path:
 
 def basic_metric(edge):
     return edge.medium_cost
+
+def radom_statistic_metric(edge):
+    """
+    :param edge: edge to count cost
+    :type edge Edge
+    """
+    return random.sample(edge.cost_samples, 1)[0]  if len(edge.cost_samples) > 0 else edge.medium_cost
