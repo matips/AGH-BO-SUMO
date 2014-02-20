@@ -2,7 +2,14 @@ from SumoPathFinding.sumoPathFinding.cityMap import Vertex, Edge
 
 
 class Path:
-    def __init__(self, vertexes:[Vertex], cost=None):
+    def __init__(self, vertexes, cost=None):
+        """
+        :param vertexes: list of Vertexes
+        :type vertexes list
+
+        :cost
+        :type cost int or float
+        """
         self.vertexes = vertexes
         self.cost = cost #if cost was estimated
         if vertexes is not None:
@@ -38,5 +45,5 @@ class Path:
 
 
 
-def basic_metric(edge: Edge):
+def basic_metric(edge):
     return edge.medium_cost

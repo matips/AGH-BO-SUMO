@@ -4,7 +4,29 @@ from SumoPathFinding.sumoPathFinding.path import Path, basic_metric
 
 
 class Population:
-    def __init__(self, city_map:CityMap, start:Vertex, end:Vertex, population_size=10, path_exchange_probability = 0.5, mutation_probability = 0.1, comparator = basic_metric):
+    def __init__(self, city_map, start, end, population_size=10, path_exchange_probability=0.5,
+                 mutation_probability=0.1, comparator=basic_metric):
+        """
+        Create population base on city_map, start and target vertexes and options like population size and probablity of muatioon
+        :param city_map
+        :type city_map CityMap
+
+        :param start
+        :type start Vertex
+
+        :param end: target node
+        :type end Vertex
+
+        :param population_size maximum population size. In Population initialization population_size ranodm path will be generated. After mutation or crossing operation new paths will be compare and reduce to population_size best paths
+        :type population_size int
+
+        :param path_exchange_probability probability of exchange sub-paths during corssing operation it. Should be flat from 0 to 1
+        :type path_exchange_probability int
+
+        :param mutation_probability probality of muation. Float form 0 to 1. During execution of algorithm mutation will be chose with this probality, otherwise crossing
+        :type mutation_probability float
+
+        """
         self.city_map = city_map
         self.start = start
         self.end = end
@@ -20,12 +42,13 @@ class Population:
 
     def run_algorithm(self, steps):
         for _ in range(steps):
-            self.add_paths([self.mutate(),] if random.random() < self.mutation_probability else list(self.crossing()))
+            self.add_paths([self.mutate(), ] if random.random() < self.mutation_probability else list(self.crossing()))
 
         return self.population[0]
 
     def add_paths(self, paths):
-        self.population = sorted(self.population + paths, key=lambda path: path.estimate_cost   (self.metric))[:self.population_size]
+        self.population = sorted(self.population + paths, key=lambda path: path.estimate_cost(self.metric))[
+                          :self.population_size]
 
     def random_path(self, start, end):
         remain = set(self.city_map.vertexes)
@@ -49,8 +72,8 @@ class Population:
 
     def crossing(self):
         path1, path2 = random.sample(self.population, 2)
-        child1 = path1.vertexes.copy()
-        child2 = path2.vertexes.copy()
+        child1 = list(path1.vertexes)
+        child2 = list(path2.vertexes)
         i = 1
         while i < len(child1) - 1:
             if child1[i] in child2:
@@ -60,8 +83,6 @@ class Population:
 
         return Path(child1), Path(child2)
 
-    def add_element(self, new_element):
-        self.elements = (self.elements + new_element).sort()[:self.population_size]
 
 
 

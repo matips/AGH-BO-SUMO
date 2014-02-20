@@ -3,8 +3,21 @@ from SumoPathFinding.sumoPathFinding.cityMap import CityMap, Vertex
 from SumoPathFinding.sumoPathFinding.path import Path
 
 
-def dijkstra_find_path(city_map:CityMap, start:Vertex, end:Vertex):
-    "Dicstra alghorith here"
+def dijkstra_find_path(city_map, start, end):
+    """
+    Find path using dijkstra algorithm. Arguments:
+     :param city_map
+     :type city_map: CityMap
+
+     :param start: first node
+     :type start Vertex
+
+     :param end: target node
+     :type end: Vertex
+
+     :returns: Path
+     :rtype: Path
+    """
     costs, prevs = shortest_path(city_map, start)
     vertexes = [end, ]
     while vertexes[0] in prevs:
@@ -12,22 +25,19 @@ def dijkstra_find_path(city_map:CityMap, start:Vertex, end:Vertex):
     return Path(vertexes=vertexes, cost=costs[end])
 
 
-def shortest_path(graph:CityMap, sourceNode:Vertex):
+def shortest_path(graph, sourceNode):
     """
     Return the shortest path distance between sourceNode and all other nodes
-    using Dijkstra's algorithm.  See
-    http://en.wikipedia.org/wiki/Dijkstra%27s_algorithm.
+    using Dijkstra's algorithm.
 
-    @attention All weights must be nonnegative.
+    :param graph CityMap.
+    :type graph CityMap
 
-    @type  graph: graph
-    @param graph: Graph.
+    :param sourceNode: Node from which to start the search.
+    :type sourceNode: Vertex
 
-    @type  sourceNode: node
-    @param sourceNode: Node from which to start the search.
-
-    @rtype  tuple
-    @return A tuple containing two dictionaries, each keyed by
+    :rtype:  tuple
+    :return: A tuple containing two dictionaries, each keyed by
         targetNodes.  The first dictionary provides the shortest distance
         from the sourceNode to the targetNode.  The second dictionary
         provides the previous node in the shortest path traversal.
@@ -36,7 +46,7 @@ def shortest_path(graph:CityMap, sourceNode:Vertex):
     # Initialization
     dist     = { sourceNode: 0 }
     previous = {}
-    q = graph.vertexes.copy()
+    q = list(graph.vertexes)
 
     # Algorithm loop
     while q:
