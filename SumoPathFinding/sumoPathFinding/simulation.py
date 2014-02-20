@@ -21,48 +21,58 @@ import traci
 
 def updateVehiclePositions(vehicles, edgeTimes, vehicleEdges, step):
     for vehicle in vehicles:
+        previousEdgeId = vehicleEdges[vehicle].onEdge   # which edge was the vehicle on in previous simulation step
         try:
-            edgeId = traci.vehicle.getRoadID(vehicle)
-        except traci.TraCIException:
+            edgeId = traci.vehicle.getRoadID(vehicle)   # which edge is the vehicle currently on
+        except traci.TraCIException:    # (if vehicle has already left the simulation)
             edgeId = None
-        previousEdgeId = vehicleEdges[vehicle].onEdge
-        if previousEdgeId != edgeId:
+
+        if previousEdgeId != edgeId:    # if vehicle has moved to an other edge
             try:
-                edgeTimes[previousEdgeId].update(step - vehicleEdges[vehicle].sinceStep)
-            except KeyError:
+                edgeTimes[previousEdgeId].update(step - vehicleEdges[vehicle].sinceStep)    # measure time spent by the vehicle on the previous edge and update edge stats
+            except KeyError:    # (if vehicle is teleporting, is on an internal edge or has just entered the simulation)
                 pass
-            vehicleEdges[vehicle] = VehicleEdgeInfo(edgeId, step)
+            vehicleEdges[vehicle] = VehicleEdgeInfo(edgeId, step)   # update edge information
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         sys.exit("Too few arguments.\nUsage: " + sys.argv[0] + " SUMO_NETWORK_FILE [STEP_LENGTH]")
 
+    # load city map and vehicle IDs
     cityMap, vehicles = loadInput(sys.argv[1])
     print("Network file loaded.")
 
     PORT = 8888
     SEED = 123456
     DEFAULT_STEP_LENGTH = 1.0
+    STDOUT_FILE = None
+    STDERR_FILE = open(os.devnull, "w") # open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../log/sumo_stderr.log'), 'w')
 
+    # start SUMO server
     sumoServer = subprocess.Popen(
         [os.path.join(os.environ['SUMO_HOME'], 'bin', 'sumo'), '--remote-port', PORT.__str__(), '--step-length',
-         sys.argv[2] if len(sys.argv) > 2 else DEFAULT_STEP_LENGTH, '--seed', SEED.__str__(), '-c', sys.argv[1]], cwd=os.getcwd())
+         sys.argv[2] if len(sys.argv) > 2 else DEFAULT_STEP_LENGTH, '--seed', SEED.__str__(), '-c', sys.argv[1]],
+        cwd=os.getcwd(), stdout=STDOUT_FILE, stderr=STDERR_FILE)
+
+    # connect to server
     traci.init(PORT)
     print("Connected.")
 
+    # dictionary: edge ID -> travel times (min, max, mean) for the edge
     edgeTimes = {}
     for edge in cityMap.edgeIter():
         edgeTimes[edge.sumo_id] = EdgeTimeStats(traci.edge.getTraveltime(edge.sumo_id))
 
-    VehicleEdgeInfo = namedtuple('VehicleEdgeInfo', ['onEdge', 'sinceStep'])
+    VehicleEdgeInfo = namedtuple('VehicleEdgeInfo', ['onEdge', 'sinceStep']) # create a new type (which edge and since which simulation step has the vehicle been on?)
+    # dictionary: vehicle ID -> edge ID and simulation step since which the vehicle has been on the edge
     vehicleEdges = {}
     for vehicle in vehicles:
         vehicleEdges[vehicle] = VehicleEdgeInfo(None, None)
 
     step = 0
     stepLength = float(sys.argv[2])
-    while traci.simulation.getMinExpectedNumber() > 0:
+    while traci.simulation.getMinExpectedNumber() > 0:  # while there are vehicles in the simulation
         traci.simulationStep()
         updateVehiclePositions(vehicles, edgeTimes, vehicleEdges, step)
         step += stepLength
@@ -70,6 +80,7 @@ if __name__ == "__main__":
     traci.close()
     sumoServer.wait()
 
+    # output - temporary; for test purposes
     print "edge ID, min time, max time, mean time:"
     for edge in cityMap.edgeIter():
         print(edge.sumo_id + ", " + str(edgeTimes[edge.sumo_id]))
