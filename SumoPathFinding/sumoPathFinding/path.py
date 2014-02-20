@@ -43,6 +43,10 @@ class Path:
         ))
         return self.cost
 
+    # WARNING: Not tested
+    # "convert" vertex path to edge path (a list of edge IDs)
+    def get_edge_ids(self):
+        return [filter(lambda edge: edge.vertex2 == self.vertexes[i+1], self.vertexes[i].edges)[0].sumo_id for i in range(len(self.vertexes)-1)]
 
 
 def basic_metric(edge):
