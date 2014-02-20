@@ -90,7 +90,7 @@ if __name__ == "__main__":
     # save city map to a file
     print("Saving the city map...")
     sys.setrecursionlimit(10000)    # the map is recursive; Python 2.x's pickle uses DFS
-    pickle.dump(cityMap, open(sys.argv[2], 'w'))
+    pickle.dump(cityMap, open(sys.argv[2], 'wb'))
     print("Done.")
 
     # # output - for test purposes
