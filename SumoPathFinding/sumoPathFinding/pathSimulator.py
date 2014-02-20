@@ -29,7 +29,7 @@ class PathSimulator:
     DELTA = 0.01
     STDERR_FILE = open(os.devnull, "w")  # open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../log/sumo_stderr.log'), 'w')
 
-    def __init__(self, sumocfgFileName, stepLength=1.0):
+    def __init__(self, sumocfgFileName, graphicMode=False, stepLength=1.0):
         """
         Create a new simulator.
 
@@ -39,10 +39,12 @@ class PathSimulator:
         """
         self.sumocfgFileName = sumocfgFileName
         self.stepLength = stepLength
+        self.graphicMode = graphicMode
 
     def __startSUMOServer(self):
+        command = 'sumo-gui' if self.graphicMode else 'sumo'
         return subprocess.Popen(
-            [os.path.join(os.environ['SUMO_HOME'], 'bin', 'sumo'), '--remote-port', str(self.PORT), '--step-length',
+            [os.path.join(os.environ['SUMO_HOME'], 'bin', command), '--remote-port', str(self.PORT), '--step-length',
              str(self.stepLength), '-c', self.sumocfgFileName], cwd=os.getcwd(), stdout=self.STDOUT_FILE,
             stderr=self.STDERR_FILE)
 
