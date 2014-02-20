@@ -68,7 +68,7 @@ class PathSimulator:
         sumoServer = self.__startSUMOServer()
 
         traci.init(self.PORT)   # connect to server
-        traci.route.add(self.ROUTE_ID, path.get_edges())    # add path to simulation
+        traci.route.add(self.ROUTE_ID, path.get_edge_ids())    # add path to simulation
         step = 0
         previousEdge = None
         while traci.simulation.getMinExpectedNumber() > 0:  # while there are vehicles in the simulation

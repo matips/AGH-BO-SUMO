@@ -17,6 +17,7 @@ with open('../input/eichstaett.citymap', 'rUb', buffering=True) as f:
     dijkstra_result =  dijkstra_find_path(city_map, start, end)
     genetic_result = population.run_algorithm(200)
     path_simulator = PathSimulator('../input/eichstaett.sumocfg')
-    print path_simulator.measurePathTime(dijkstra_result, 0)
-    print path_simulator.measurePathTime(genetic_result, 0)
+    dr =  path_simulator.measurePathTime(dijkstra_result, 0)
+    print dr
+    #print path_simulator.measurePathTime(genetic_result, 0)
 
