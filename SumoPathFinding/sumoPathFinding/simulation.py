@@ -1,69 +1,75 @@
 __author__ = 'Piotrek'
 
-import os, sys
-if 'SUMO_HOME' in os.environ:
-    tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
-    sys.path.append(tools)
-else:
-    sys.exit("please declare environment variable 'SUMO_HOME'")
-
-if len(sys.argv) < 2:
-    sys.exit("Too few arguments.\nUsage: " + sys.argv[0] + " SUMO_NETWORK_FILE")
-
+import os
+import sys
+import subprocess
 from SumoPathFinding.sumoPathFinding.inputLoader import loadInput
-cityMap, vehicles = loadInput(sys.argv[1])
-print("Network file loaded.")
+from SumoPathFinding.sumoPathFinding.edgeTimeStats import EdgeTimeStats
+from collections import namedtuple
 
-class EdgeTimeStats:
-    def __init__(self, estimatedTime):
-        self.minTime, self.maxTime = estimatedTime
-        self.timeSum = 0
-        self.sampleCount = 0
+# Assertions for "traci" module import:
 
-    def update(self, time):
-        self.timeSum += time
-        self.sampleCount += 1
-        if time < self.minTime:
-            self.minTime = time
-        if time < self.maxTime:
-            self.maxTime = time
+if sys.version_info.major != 2:
+    sys.exit("SUMO TraCI requires Python version 2.x")
 
-    def meanTime(self):
-        return self.minTime if self.sampleCount == 0 else self.timeSum / self.sampleCount
-
-vehicleEdges = {}
-for vehicle in vehicles:
-    vehicleEdges[vehicle] = [None, None]
+if 'SUMO_HOME' in os.environ:
+    sys.path.append(os.path.join(os.environ['SUMO_HOME'], 'tools'))
+else:
+    sys.exit("Please declare environment variable 'SUMO_HOME'")
 
 import traci
 
-PORT = 8888
-print("Connecting...")
-traci.init(PORT)
-print("Simulation started.")
-step = 0
-edgeTimes = {}
-for edge in cityMap.edgeIter():
-    edgeTimes[edge.sumo_id] = EdgeTimeStats(traci.edge.getTravelTime(edge.sumo_id))
-while traci.simulation.getMinExpectedNumber() > 0:
-    traci.simulationStep()
+def updateVehiclePositions(vehicles, edgeTimes, vehicleEdges, step):
     for vehicle in vehicles:
-        edge = traci.vehicle.getRoadID(vehicle)
-        previousEdge = vehicleEdges[vehicle][0]
-        if previousEdge != edge:
-            if previousEdge != None:
-                time = step - vehicleEdges[vehicle][1]
-                edgeTimes[previousEdge][0] ########################
-            vehicleEdges[vehicle][0] = edge
-            vehicleEdges[vehicle][1] = step
-    #for edge in cityMap.edgeIter():
-    #    times[edge.sumo_id].append(traci.edge.getLastStepMeanSpeed(edge.sumo_id))
-    #    edge.medium_cost += traci.edge.getTraveltime(edge.sumo_id)
-    step += 1
+        try:
+            edgeId = traci.vehicle.getRoadID(vehicle)
+        except traci.TraCIException:
+            edgeId = None
+        previousEdgeId = vehicleEdges[vehicle].onEdge
+        if previousEdgeId != edgeId:
+            try:
+                edgeTimes[previousEdgeId].update(step - vehicleEdges[vehicle].sinceStep)
+            except KeyError:
+                pass
+            vehicleEdges[vehicle] = VehicleEdgeInfo(edgeId, step)
 
-traci.close()
 
-for edge in cityMap.edgeIter():
-    edge.medium_cost /= step
-    print edge.sumo_id, ',', edgeTimes[edge.sumo_id]
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        sys.exit("Too few arguments.\nUsage: " + sys.argv[0] + " SUMO_NETWORK_FILE [STEP_LENGTH]")
 
+    cityMap, vehicles = loadInput(sys.argv[1])
+    print("Network file loaded.")
+
+    PORT = 8888
+    SEED = 123456
+    DEFAULT_STEP_LENGTH = 1.0
+
+    sumoServer = subprocess.Popen(
+        [os.path.join(os.environ['SUMO_HOME'], 'bin', 'sumo'), '--remote-port', PORT.__str__(), '--step-length',
+         sys.argv[2] if len(sys.argv) > 2 else DEFAULT_STEP_LENGTH, '--seed', SEED.__str__(), '-c', sys.argv[1]], cwd=os.getcwd())
+    traci.init(PORT)
+    print("Connected.")
+
+    edgeTimes = {}
+    for edge in cityMap.edgeIter():
+        edgeTimes[edge.sumo_id] = EdgeTimeStats(traci.edge.getTraveltime(edge.sumo_id))
+
+    VehicleEdgeInfo = namedtuple('VehicleEdgeInfo', ['onEdge', 'sinceStep'])
+    vehicleEdges = {}
+    for vehicle in vehicles:
+        vehicleEdges[vehicle] = VehicleEdgeInfo(None, None)
+
+    step = 0
+    stepLength = float(sys.argv[2])
+    while traci.simulation.getMinExpectedNumber() > 0:
+        traci.simulationStep()
+        updateVehiclePositions(vehicles, edgeTimes, vehicleEdges, step)
+        step += stepLength
+
+    traci.close()
+    sumoServer.wait()
+
+    print "edge ID, min time, max time, mean time:"
+    for edge in cityMap.edgeIter():
+        print(edge.sumo_id + ", " + str(edgeTimes[edge.sumo_id]))
