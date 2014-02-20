@@ -63,12 +63,11 @@ class PathSimulator:
         sumoServer = self.__startSUMOServer()
 
         traci.init(self.PORT)   # connect to server
-        traci.route.add(self.ROUTE_ID, path.get_edges())    # add path to simulation
+        traci.route.add(self.ROUTE_ID, path.get_edge_ids())    # add path to simulation
         step = 0
         previousEdge = None
         while traci.simulation.getMinExpectedNumber() > 0:  # while there are vehicles in the simulation
             traci.simulationStep()
-            step += self.stepLength
             if abs(departureTime-step) < self.DELTA:
                 traci.vehicle.add(self.VEHICLE_ID, self.ROUTE_ID)
                 traci.vehicle.setColor(self.VEHICLE_ID, self.RED_COLOR)
@@ -85,3 +84,6 @@ class PathSimulator:
                         raise RuntimeError('The vehicle teleported! Cannot measure correct travel time. Try modifying the departure time slightly or assign other path')
                     else:
                         previousEdge = currentEdge
+            step += self.stepLength
+
+        raise RuntimeError('The vehicle did not leave the simulation. Perhaps the specified departure time was too late.')
