@@ -86,6 +86,7 @@ if __name__ == "__main__":
         edge.minimum_cost = edgeTimes[edge.sumo_id].getMinTime()
         edge.maximum_cost = edgeTimes[edge.sumo_id].getMaxTime()
         edge.medium_cost = edgeTimes[edge.sumo_id].getMeanTime()
+        edge.cost_samples = edgeTimes[edge.sumo_id].timeSamples
 
     # save city map to a file
     print("Saving the city map...")
