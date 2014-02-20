@@ -10,7 +10,6 @@ __author__ = 'Mateusz'
 city_map = init_city_map()
 
 print ("Dijkstra path:")
-time()
 print (dijkstra_find_path(city_map, city_map.vertexes[0], city_map.vertexes[10]))
 
 print ("Population paths:")
