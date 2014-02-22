@@ -1,11 +1,11 @@
 import random
 from SumoPathFinding.sumoPathFinding.cityMap import CityMap, Vertex
-from SumoPathFinding.sumoPathFinding.path import Path, basic_metric
+from SumoPathFinding.sumoPathFinding.path import Path, min_max_triangular_metric
 
 
 class Population:
     def __init__(self, city_map, start, end, population_size=10, path_exchange_probability=0.5,
-                 mutation_probability=0.1, comparator=basic_metric):
+                 mutation_probability=0.1, comparator=min_max_triangular_metric):
         """
         Create population base on city_map, start and target vertexes and options like population size and probablity of muatioon
         :param city_map
