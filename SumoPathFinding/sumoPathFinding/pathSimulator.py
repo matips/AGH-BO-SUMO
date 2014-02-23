@@ -13,7 +13,6 @@ except AttributeError:
     if sys.version[0] != '2':
         sys.exit("SUMO TraCI requires Python version 2.x")
 
-
 if 'SUMO_HOME' in os.environ:
     sys.path.append(os.path.join(os.environ['SUMO_HOME'], 'tools'))
 else:
