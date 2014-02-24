@@ -30,7 +30,7 @@ class PathSimulator:
     ROUTE_ID = 'highway_to_hell'
     VEHICLE_ID = 'wehikul_czasu'
     RED_COLOR = (255, 0, 0, 0)
-    DELTA = 0.01
+    DELTA = 1
     STDERR_FILE = open(os.devnull, "w")  # open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../log/sumo_stderr.log'), 'w')
 
     def __init__(self, sumocfgFileName, graphicMode=False, stepLength=1.0):
@@ -72,7 +72,7 @@ class PathSimulator:
         previousEdge = None
         while traci.simulation.getMinExpectedNumber() > 0:  # while there are vehicles in the simulation
             traci.simulationStep()
-            if abs(departureTime-step) < self.DELTA:
+            if previousEdge == None and abs(departureTime-step) < self.DELTA:
                 traci.vehicle.add(self.VEHICLE_ID, self.ROUTE_ID)
                 traci.vehicle.setColor(self.VEHICLE_ID, self.RED_COLOR)
                 previousEdge = traci.vehicle.getRoadID(self.VEHICLE_ID)
@@ -85,6 +85,9 @@ class PathSimulator:
                     return step - departureTime
                 if currentEdge != previousEdge:
                     if currentEdge == '':   # protection against unwanted vehicle teleport (refer to SUMO docs)
+                        traci.close()
+                        sumoServer.wait()
+                        return 0
                         raise RuntimeError('The vehicle teleported! Cannot measure correct travel time. Try modifying the departure time slightly or assign other path')
                     else:
                         previousEdge = currentEdge

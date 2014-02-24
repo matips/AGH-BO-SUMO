@@ -1,11 +1,12 @@
 import random
 from SumoPathFinding.sumoPathFinding.cityMap import CityMap, Vertex
-from SumoPathFinding.sumoPathFinding.path import Path, min_max_triangular_metric
+from SumoPathFinding.sumoPathFinding.path import Path, guessed_metric
+from SumoPathFinding.sumoPathFinding.pathFinder import dijkstra_find_path
 
 
 class Population:
-    def __init__(self, city_map, start, end, population_size=10, path_exchange_probability=0.5,
-                 mutation_probability=0.1, comparator=min_max_triangular_metric):
+    def __init__(self, city_map, start, end, population_size=10, path_exchange_probability=1,
+                 mutation_probability=1, comparator=guessed_metric, dijkstra=False):
         """
         Create population base on city_map, start and target vertexes and options like population size and probablity of muatioon
         :param city_map
@@ -34,16 +35,20 @@ class Population:
             raise Exception("Population size have to be >= 2 ")
 
         self.population_size = population_size
-        self.population = [self.random_path(self.start, self.end) for _ in range(population_size)]
-
+        if dijkstra:
+            dijkstra_path = dijkstra_find_path(city_map, self.start, self.end)
+            self.population = [self.mutated_dijktra_path(dijkstra_path) for _ in range(population_size)]
+        else:
+            self.population = [self.random_path(self.start, self.end) for _ in range(population_size)]
+        self.dijkstra = dijkstra
         self.path_exchange_probability = path_exchange_probability
         self.mutation_probability = mutation_probability
         self.metric = comparator
 
-    def run_algorithm(self, steps):
-        for _ in range(steps):
+    def run_algorithm(self, steps, fileGen):
+        for i in range(steps):
             self.add_paths([self.mutate(), ] if random.random() < self.mutation_probability else list(self.crossing()))
-
+            fileGen.write("{0}: {1}\n".format(i, self.population[0].estimate_cost(self.metric)))
         return self.population[0]
 
     def add_paths(self, paths):
@@ -82,6 +87,10 @@ class Population:
             i += 1
 
         return Path(child1), Path(child2)
+
+    def mutated_dijktra_path(self, path):
+        div1, div2 = sorted(random.sample(range(len(path)), 2))
+        return Path(path[:div1] + self.random_path(path[div1], path[div2]).vertexes + path[div2:])
 
 
 

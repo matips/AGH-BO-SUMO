@@ -51,14 +51,12 @@ class Path:
 def average_metric(edge):
     return edge.medium_cost
 
+def guessed_metric(edge):
+    return edge.guessed_cost
+
 def radom_statistic_metric(edge):
     """
     :param edge: edge to count cost
     :type edge Edge
     """
     return random.sample(edge.cost_samples, 1)[0] if len(edge.cost_samples) > 0 else edge.medium_cost
-
-def min_max_triangular_metric(edge):
-    if edge.minimum_cost == edge.maximum_cost:
-        return edge.maximum_cost
-    return random.triangular(edge.minimum_cost, edge.maximum_cost, (edge.minimum_cost+edge.maximum_cost) / 2.0)

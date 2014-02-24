@@ -1,3 +1,5 @@
+import random
+
 __author__ = 'Piotrek'
 
 class Vertex:
@@ -22,7 +24,7 @@ class Edge:
     class VertexIsNotInEdge(Exception):
         pass
 
-    def __init__(self, sumo_id, vertex1, vertex2, medium_cost=None, maximum_cost=None, minimum_cost=None, cost_samples=[]):
+    def __init__(self, sumo_id, vertex1, vertex2, medium_cost=None, maximum_cost=None, minimum_cost=None, guessed_cost=None, cost_samples=[]):
         self.sumo_id = sumo_id
         self.vertex1 = vertex1
         self.vertex2 = vertex2
@@ -30,6 +32,7 @@ class Edge:
         self.maximum_cost = maximum_cost
         self.minimum_cost = minimum_cost
         self.cost_samples = cost_samples
+        self.guessed_cost = guessed_cost
 
 class CityMap:
     def __init__(self, vertexes = None):
@@ -42,3 +45,12 @@ class CityMap:
         for vertex in self.vertexes:
             for edge in vertex.edges:
                 yield edge
+
+    def guessCosts(self, guesser):
+        for edge in self.edgeIter():
+            edge.guessed_cost = guesser(edge)
+
+def min_max_triangular_guesser(edge):
+    if edge.minimum_cost == edge.maximum_cost:
+        return edge.maximum_cost
+    return random.triangular(edge.minimum_cost, edge.maximum_cost, (2.0 * (edge.minimum_cost+edge.maximum_cost)) / 3.0)
