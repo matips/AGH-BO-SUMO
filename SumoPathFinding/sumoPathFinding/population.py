@@ -37,7 +37,7 @@ class Population:
         self.population_size = population_size
         if dijkstra:
             dijkstra_path = dijkstra_find_path(city_map, self.start, self.end)
-            self.population = [self.mutated_dijktra_path(dijkstra_path) for _ in range(population_size)]
+            self.population = [self.mutated_dijktra_path(dijkstra_path) for _ in range(population_size)] + [dijkstra_path]
         else:
             self.population = [self.random_path(self.start, self.end) for _ in range(population_size)]
         self.dijkstra = dijkstra

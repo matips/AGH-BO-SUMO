@@ -12,11 +12,11 @@ with open('../input/eichstaett.citymap', 'rUb', buffering=True) as f:
     city_map = pickle.load(f)
 file = open('eichstaett_output.txt', 'w', buffering=False)
 fileGen = open('eichstaett_generations.txt', 'w', buffering=False)
-file.write("result / time\n")
+file.write("dijkstra result / dijkstra time / genetic result / genetic time\n")\
 
 random.seed(123)
 
-for iii in range(10):
+for iii in range(20):
     print "pass", iii
     fileGen.write("--------------------- Proba {0} ---------------------------------\n".format(iii))
     start, end = random.sample(city_map.vertexes, 2)
@@ -29,10 +29,13 @@ for iii in range(10):
     mpt1 = path_simulator.measurePathTime(dijkstra_result, depTime)
     for generations in [200]:
         timer = Timer()
-        population = Population(city_map, start, end, mutation_probability=1, path_exchange_probability=1, dijkstra=False)
-        genetic_result = population.run_algorithm(generations, fileGen)
-        timer.stop("Genetic")
-        mpt2 = path_simulator.measurePathTime(genetic_result, depTime)
+        mpt2 = 0
+        for i in range(3):
+            population = Population(city_map, start, end, mutation_probability=1, path_exchange_probability=1, dijkstra=False)
+            genetic_result = population.run_algorithm(generations, fileGen)
+            timer.stop("Genetic")
+            mpt2 += path_simulator.measurePathTime(genetic_result, depTime)
+        mpt2 /= 3.0
         file.write("{0} {1} {2} {3}\n".format(mpt1, timer1.get_avg("Dijkstra"), mpt2, timer.get_avg("Genetic")))
 file.close()
 #
