@@ -44,7 +44,7 @@ file.close()
 # file = open('rand20_output1.txt','w')
 # file.write("Dijkstra             Genetic\n")
 # file.write("result time          result time\n")
-#
+
 # for _ in range(7):
 # 	start, end = random.sample(city_map.vertexes, 2)
 # 	timer = Timer()
